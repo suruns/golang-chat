@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>go-chat</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        .container{
+            width: 1140px;
+            margin: 0 auto;
+            height: 100%;
+        }
+        .chat-main{
+            width: 800px;
+            height: 600px;
+            border: 1px solid #b2b2b2;
+            border-radius: 10px;
+            margin: 100px auto;
+            position: relative;
+        }
+        .chat-user-list{
+            float: left;
+            height: 100%;
+            width: 200px;
+            background: #1f77b4;
+            border-radius: 9px 0 0 9px;
+        }
+        .chat-user-list > .chat-me {
+            color: #fff;
+            height: 50px;
+            width: 100%;
+            text-align: left;
+            border-bottom: 1px solid #fff;
+        }
+        .chat-user-list > .chat-user {
+            color: #fff;
+            height: 50px;
+            width: 100%;
+            text-align: left;
+            border-bottom: 1px solid #b2b2b2;
+        }
+        .chat-user-list > .chat-me > p,.chat-user-list > .chat-user > p{
+            padding-left: 10px;
+            margin-top: 3px;
+        }
+        .chat-window{
+            float: left;
+            width: 600px;
+            height: 100%;
+        }
+        .chat-messages{
+            width: 580px;
+            height: 380px;
+            border-bottom: 1px solid #b2b2b2;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .chat-send-window{
+            width: 100%;
+            height: 200px;
+            position: relative;
+        }
+        .send-btn{
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            text-decoration: none;
+            background: #1f77b4;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .send-window{
+            width: 560px;
+            /*padding-top: 40px;*/
+            margin-left: 20px;
+            height: 130px;
+            outline: none;
+            border: none;
+            font-size: 25px;
+            resize: none;
+        }
+        .send-window img{
+            width: 30px;
+            height: 30px;
+        }
+        .message{
+            width: 100%;
+            min-height: 50px;
+            float: left;
+        }
+        .message > .text {
+            max-width: 500px;
+            word-wrap: break-word;
+            word-break: normal;
+            margin-bottom: 15px;
+        }
+        .message > .text > img{
+            width: 25px;
+            height: 25px;
+        }
+        .message > .text > a> img{
+            width: 300px;
+        }
+        .mine-message > .name{
+            float: right;
+            margin-top: 5px;
+        }
+        .mine-message > .text{
+            float: right;
+            padding: 5px;
+            background: #1f77b4;
+            color: #fff;
+            border-radius: 5px;
+            margin-right: 15px;
+            position: relative;
+        }
+        .mine-message > .text:after{
+            border: solid transparent;
+            content: ' ';
+            height: 0;
+            left: 100%;
+            position: absolute;
+            width: 0;
+            border-width: 6px;
+            border-left-color: #1f77b4;
+            top: 7px;
+        }
+        .other-message > .name{
+            float: left;
+            margin-top: 5px;
+        }
+        .other-message > .text{
+            float: left;
+            padding: 5px;
+            background:#b2b2b2;
+            color: #fff;
+            border-radius: 5px;
+            margin-left: 15px;
+            position: relative;
+        }
+        .other-message > .text:after{
+            border: solid transparent;
+            content: ' ';
+            height: 0;
+            right: 100%;
+            position: absolute;
+            width: 0;
+            border-width: 6px;
+            border-right-color: #b2b2b2;
+            top: 7px;
+        }
+        .layer{
+            display: none;
+            background: rgba(0,0,0,.5);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .tips{
+            padding-top: 5px;
+            width: 200px;
+            height: 140px;
+            background: #fff;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-left: -100px;
+            margin-top: -70px;
+            text-align: center;
+        }
+        #input-window{
+            outline: none;
+            border: none;
+            width: 90%;
+            margin-top: 15px;
+            border-bottom: 1px solid #1f77b4;
+        }
+        #input-btn {
+            text-decoration: none;
+            margin-top: 20px;
+            display: block;
+            color: #fff;
+            background: #1f77b4;
+            padding: 5px 10px;
+            border-radius: 5px;
+            width: 50px;
+            margin-left: 65px;
+        }
+        .chat-info{
+            text-align: center;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        .chat-info > span{
+            background: #b2b2b2;
+            color: #fff;
+            font-size: 10px;
+            padding: 3px 10px;
+            border-radius: 10px;
+        }
+        .chat-tools{
+            width: 100%;
+            height: 40px;
+            position: relative;
+        }
+        .chat-tools>a>img{
+            margin-top: 5px;
+            margin-left: 10px;
+            width: 30px;
+            height: 30px;
+        }
+        .emoji-list{
+            width: 440px;
+            height: 200px;
+            position: absolute;
+            left: 5px;
+            top: -205px;
+            box-shadow: 0 0 5px rgba(0,0,0,.3);
+            display: none;
+        }
+        .chat-tools a{
+            width: 40px;
+            height: 40px;
+            float: left;
+            position: relative;
+        }
+        .emoji-list a img{
+            width: 30px;
+            height: 30px;
+            float: left;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .hidden{
+            display: none;
+        }
+        #selectImageInput{
+            opacity: 0;
+            filter: alpha(opacity=0);
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        @media screen and (max-width: 760px){
+            .container{
+                width: 100%;
+            }
+            .chat-main{
+                width: 100%;
+                height: 100%;
+                position: fixed;
+                top: 0;
+                left: 0;
+                margin: 0;
+                border: 0;
+            }
+            .chat-window{
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                border:0;
+            }
+            .chat-send-window{
+                width: 100%;
+                height: 30%;
+                border-radius: 0;
+            }
+            .chat-messages{
+                width: calc(100% - 20px);
+                height: calc(70% - 20px);
+                border-radius: 0;
+            }
+            .chat-user-list{
+                display: none;
+            }
+            .send-btn{
+
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="chat-main">
+        <div class="chat-user-list">
+            <div class="chat-me">
+                <p class="my-name"></p>
+                <p class="my-ip"></p>
+            </div>
+        </div>
+        <div class="chat-window">
+            <div class="chat-messages">
+            </div>
+            <div class="chat-send-window">
+                <div class="chat-tools">
+
+                    <a href="javascript:;">
+                        <img class="chat-emoji" src="../static/emoji/701.png"/>
+                    </a>
+                    <div class="emoji-list">
+                    </div>
+                    <a>
+                        <input accept="image/*" type="file" id="selectImageInput">
+                        <img src="../static/image/img.svg" onclick="document.getElementById('selectImageInput').onclick">
+                    </a>
+                </div>
+                <div contenteditable="true" class="send-window"></div>
+                <a class="send-btn" href="javascript:;">发送</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layer">
+    <div class="tips">
+        <p>您局域网ip为：<span class="current-ip">{{.}}</span></p>
+        <input id="input-window" type="text" placeholder="请输入你的名字" />
+        <a href="javascript:;" id="input-btn">确定</a>
+    </div>
+</div>
+</body>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="/static/js/utils.js"></script>
+<script src="/static/js/ws.js"></script>
+<script>
+    
+    var chatMessages = document.getElementsByClassName("chat-messages")[0];
+    var chatUserList = document.getElementsByClassName("chat-user-list")[0];
+    var sendWindow = document.getElementsByClassName("send-window")[0];
+    var sendBtn = document.getElementsByClassName("send-btn")[0];
+    var currentIp = document.getElementsByClassName("current-ip")[0];
+    var layer = document.getElementsByClassName("layer")[0];
+    var myName = document.getElementsByClassName("my-name")[0];
+    var myIp = document.getElementsByClassName("my-ip")[0];
+    var inputWindow = document.getElementById("input-window");
+    var inputBtn = document.getElementById("input-btn");
+    var selectImageInput = document.getElementById("selectImageInput");
+    var chatEmoji = document.getElementsByClassName("chat-emoji")[0];
+    var emojiList = document.getElementsByClassName("emoji-list")[0];
+
+    addAllEmoji();
+
+    emojiList.addEventListener("click",function (e) {
+        var _target = e.target
+        if(_target.tagName.toLocaleLowerCase() === "img"){
+            var u = _target.src
+            var e = document.createElement("img")
+            e.src = u
+            sendWindow.appendChild(e)
+            emojiList.hide()
+        }
+    })
+    sendBtn.onclick = function () {
+        var text = sendWindow.innerHTML;
+        if(text.length > 0){
+            // utils.createMessage(user.name,text)
+            sendWindow.innerHTML = ""
+            send(user,text)
+        }else{
+            alert("发送内容不能为空")
+        }
+    }
+    inputBtn.onclick = function () {
+        var text = inputWindow.value;
+        if(text.length > 0){
+            user.name = text
+            myName.innerText = text
+            myIp.innerText = user.ip
+            postInfo()
+        } else {
+            alert("请输入您的名字")
+        }
+    }
+    var showEmojies = false
+    chatEmoji.onclick = function () {
+        if(!showEmojies){
+            emojiList.show()
+        } else {
+            emojiList.hide()
+        }
+    }
+    selectImageInput.addEventListener("change",function (e) {
+        // console.log(e.target.files[0])
+        var formdata = new FormData();
+        formdata.append("file",e.target.files[0]);
+        formdata.append("type","image")
+        formdata.append("ip",user.ip)
+        axios({
+            url:'/upload',
+            method: 'post',
+            data:formdata,
+            headers:{'Content-Type':'multipart/form-data'}
+        }).then(function (value) {
+            if(value.data.status === 200) {
+                // console.log(value.data)
+                if(value.data.type === "image"){
+                    // utils.createImageMessage(user.name,value.data.url)
+                }
+            } else {
+                alert("网络异常，请稍后再试")
+                console.error(value.data.msg)
+            }
+        }).catch(function (reason) {
+            alert("服务器繁忙")
+            console.log(reason)
+        })
+    })
+    var user = {
+        name: "Admin",
+        ip: null
+    }
+
+
+
+    function postInfo() {
+        var params = new URLSearchParams()
+        params.append("name",user.name)
+        params.append("ip",user.ip)
+        axios.post("/register",params).then(function (value) {
+            if(value.data.status === 200) {
+                alert("注册成功")
+                layer.hide()
+                sendLogin()
+            } else {
+                alert("网络异常，请稍后再试")
+            }
+        }).catch(function (reason) {
+            alert("服务器繁忙")
+            console.log(reason)
+        })
+    }
+    function showUserList() {
+        axios.get("/list?ip="+user.ip)
+                .then(function (value) {
+                    if(value.data.status === 200) {
+                        value.data.entities.forEach(function (item) {
+                            utils.createUser(item.name,item.ip)
+                        })
+                    } else {
+                        alert("网络异常，请稍后再试")
+                    }
+                }).catch(function (reason) {
+                    alert("服务器繁忙")
+                    console.log(reason)
+                })
+    }
+
+    function addAllEmoji() {
+        for(var i = 701; i<756;i++){
+            var emoji = document.createElement("a")
+            emoji.href = "javascript:;"
+            var eImg =document.createElement("img")
+            eImg.src = '../static/emoji/'+i+'.png'
+            emoji.appendChild(eImg)
+            emojiList.appendChild(emoji)
+        }
+    }
+    
+    Node.prototype.show = function () {
+        this.style.display = "block";
+    }
+    Node.prototype.hide = function () {
+        this.style.display = "none";
+    }
+</script>
+</html>

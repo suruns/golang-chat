@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .emojiSvg {
+            width: 2em;
+            height: 2em;
+        }
+
+        div.newpost {
+            text-align: center;
+            line-height: 18px;
+            font-size: 16px;
+            padding: 0px;
+            background: #fff;
+            width: 100%;
+            height: 100px;
+            _height: 16px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 15px;
+            outline: 0;
+            word-wrap: break-word;
+            overflow-y: hidden;
+            z-index: 1000;
+            border-bottom: 1px solid #cccccc;
+        }
+
+        #face {
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+<div name="note" class="newpost" id="emojiInput" contenteditable="true"></div>
+<div id="face"></div>
+</body>
+<script>
+    //生成表情
+    window.onload = function() {
+        var face = document.getElementById('face');
+        for(var i = 701; i < 757; i++) {
+            var a = document.createElement("a");
+            a.href = "javascript:;";
+            a.innerHTML = '<img class="emojiSvg" src="../static/emoji/' + i + '.png" alt="" />';
+            face.appendChild(a);
+        };
+    }
+
+    //点击插入表情
+    setTimeout(function() {
+        var pickers = face.getElementsByTagName('a');
+        var emojiInput = document.getElementById('emojiInput');
+        for(var i = 0; i < pickers.length; i++) {
+            pickers[i].onclick = function(e) {
+                document.getElementById('emojiInput').focus();
+                insertHtmlAtCaret(this.innerHTML);
+                //    emojiInput.innerHTML+=this.innerHTML;
+            }
+        }
+
+        function insertHtmlAtCaret(html) {
+            var sel, range;
+            if(window.getSelection) {
+                // IE9 and non-IE
+                sel = window.getSelection();
+                if(sel.getRangeAt && sel.rangeCount) {
+                    range = sel.getRangeAt(0);
+                    range.deleteContents();
+                    // Range.createContextualFragment() would be useful here but is
+                    // non-standard and not supported in all browsers (IE9, for one)
+                    var el = document.createElement("div");
+                    el.innerHTML = html;
+                    var frag = document.createDocumentFragment(),
+                            node, lastNode;
+                    while((node = el.firstChild)) {
+                        lastNode = frag.appendChild(node);
+                    }
+                    range.insertNode(frag);
+                    // Preserve the selection
+                    if(lastNode) {
+                        range = range.cloneRange();
+                        range.setStartAfter(lastNode);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                }
+            } else if(document.selection && document.selection.type != "Control") {
+                // IE < 9
+                document.selection.createRange().pasteHTML(html);
+            }
+        }
+    }, 500);
+</script>
+</html>
